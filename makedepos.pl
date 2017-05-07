@@ -18,29 +18,58 @@ my $num= -1 ; # counter for reaction labels in output file
 #  $idx:    index of current species in species/vd array
 
 ## file handling
-#  $dfil:      data file "depos.dat" with predefined deposition velocities
-#  $writefile: output KPP file "depos.kpp"
-#  $file:      input KPP files with definitions of species
+#  $dfu:       file unit for data file "depos.dat"
+#              with predefined deposition velocities
+my $fdat;#     file name (and path) of data file
+#  $kfu:       input KPP files with definitions of species
 #              used in current mechanism
+my @fkpp;#     list of file names (and paths) of input KPP files
+#              without file ending '.kpp'
+#              In script argument, put list in quotes
+#              and separate elements by whitespaces
+#  $writefile: output KPP file "depos.kpp"
+
+########################################################################
+
+# Define input data file:
+if (exists $ARGV[0]) {
+  $fdat = $ARGV[0];
+} else {
+  $fdat = 'depos.dat';
+}
+print "\nData file:         $fdat\n";
+
+# Define input kpp files:
+if (exists $ARGV[1]) {
+  my $targ = $ARGV[1];
+  $targ =~ s/^\s+//;
+  $targ =~ s/\s+$//;
+  @fkpp = split(/\s+/, $targ);
+} else {
+  @fkpp = ('inorganic','organic');
+}
+print "KPP input file(s): ", join(", ", @fkpp), "\n";
 
 ########################################################################
 
 # Read in species and definitions of deposition velocities (vd)
 # from data file "depos.dat"
-open (my $dfil, '<', "depos.dat") or die "Could not open file $!";
-chomp(my @lines = <$dfil>);
-close($dfil);
+open (my $dfu, '<', $fdat) or die "Could not open file $fdat: $!";
+chomp(my @lines = <$dfu>);
+close($dfu);
 
 # Split array of input lines into array of species names and vd
 # unless it is an empty line or comment line starting with '#'
+print "\nPredefined values\n-----------------\n";
 foreach (@lines) {
   if ($_ !~ /^\s*#/ && $_ !~ /^\s*$/) {
     $_ =~ s/^\s+//;
-    print "$_\n";
     my @spl = split(/\s+/, $_);
     push @dspc, $spl[0];
     push @vd, $spl[1];
+    print "$_\n" if $dspc[-1] !~ /DEPOS/;
 } }
+print "---------------------\n";
 
 # Find standard value and save to vdstd.
 # If no standard value is defined in input file, use 5.00d-6.
@@ -52,16 +81,17 @@ if ($idx > 0) {
 }
 
 print "vd(standard): ",$vdstd, "\n" ;
+print "---------------------\n";
 
 ########################################################################
 
 # Open output file and set KPP EQUATIONS variable
-open(my $writefile, ">","depos.kpp") or die "Could not open file  $!";
+open(my $writefile, ">","depos.kpp") or die "Could not open file depos.kpp: $!";
 print $writefile "#EQUATIONS\n";
 
 # Loop over KPP files
-for my $file ('inorganic','organic') {
-  open( FILE, "<$file.kpp" )  or die("Couldn't open :$!\\n");
+for my $kfu (@fkpp) {
+  open( FILE, "<$kfu.kpp" )  or die("Couldn't open file $kfu.kpp:$!\\n");
 # Find lines with species definitions
   while (<FILE>) {
     if (/.*\=\s*IGNORE.*/) {
@@ -90,4 +120,6 @@ for my $file ('inorganic','organic') {
 }
 close($writefile);
 
-########################################################################
+print "\nOutput written to 'depos.kpp'.\n\n"
+
+#######################################################################
