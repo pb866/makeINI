@@ -10,7 +10,7 @@ my @vd;       # deposition velocities
 my $mspc;     # species used in current mechanism
 my $vdstd;    # standard deposition velocitiy
               # (defined with key word "DEPOS" in depos.dat)
-my $num= -1 ; # counter for reaction labels in output file
+my $num= 0 ;  # counter for reaction labels in output file
 
 ## Temporary auxiliary arrays/variables
 #  @lines:  lines read in from input file
@@ -35,7 +35,7 @@ my @fkpp;#     list of file names (and paths) of input KPP files
 if (exists $ARGV[0]) {
   $fdat = $ARGV[0];
 } else {
-  $fdat = 'depos.dat';
+  $fdat = 'emiss.dat';
 }
 print "\n\033[94mData file:         $fdat\n";
 
@@ -48,7 +48,7 @@ if (exists $ARGV[1]) {
 } else {
   @fkpp = ('inorganic','organic');
 }
-print "KPP input file(s): ", join(", ", @fkpp), "\033[0m\n";
+print "KPP input file(s): ", join(", ", @fkpp), "\033[0m\n\n";
 
 ########################################################################
 
@@ -60,34 +60,25 @@ close($dfu);
 
 # Split array of input lines into array of species names and vd
 # unless it is an empty line or comment line starting with '#'
-print "\nPredefined values\n-----------------\n";
 foreach (@lines) {
   if ($_ !~ /^\s*#/ && $_ !~ /^\s*$/) {
     $_ =~ s/^\s+//;
     my @spl = split(/\s+/, $_);
     push @dspc, $spl[0];
     push @vd, $spl[1];
-    print "$_\n" if $dspc[-1] !~ /DEPOS/;
 } }
-print "---------------------\n";
+print "\033[95mEmissions are only used for species included in the input ",
+      "mechanisms.\nIF species are not listed here, but in $fdat, check for ",
+      "their\npresence in the specified kpp files and possibly change the ",
+      "kpp files.\033[0m\n",
+      "\033[92mThe following emissions are used in the current scenario:\033[0m\n";
 
-# Find standard value and save to vdstd.
-# If no standard value is defined in input file, use 5.00d-6.
-my $idx = first_index { $_ eq "DEPOS" } @dspc;
-if ($idx > 0) {
-  $vdstd = $vd[$idx];
-} else {
-  $vdstd = "5.00d-6"
-}
-
-print "\033[92m\e[1mvd(standard): ",$vdstd, "\033[0m\n" ;
-print "---------------------\n";
 
 ########################################################################
 
 # Open output file and set KPP EQUATIONS variable
-open(my $writefile, ">","depos.kpp") or die "Could not open file depos.kpp: $!";
-print $writefile "#EQUATIONS\n";
+open(my $writefile, ">","emiss.kpp") or die "Could not open file emiss.kpp: $!";
+print $writefile "#DEFFIX\nEMISS=IGNORE;\nEQUATIONS\n";
 
 # Loop over KPP files
 for my $kfu (@fkpp) {
@@ -95,8 +86,6 @@ for my $kfu (@fkpp) {
 # Find lines with species definitions
   while (<FILE>) {
     if (/.*\=\s*IGNORE.*/) {
-# Increase counter
-      $num += 1 ;
 # Get species and store in $mspc
       s/\s*(\w)\s*\=\s*IGNORE.*/$1/g ;
       $mspc = $_ ;
@@ -104,15 +93,12 @@ for my $kfu (@fkpp) {
 
 # Define experimental values:
       if (grep(/^$mspc$/, @dspc)) {
-        $idx = first_index { $_ eq $mspc } @dspc;
+        $num += 1 ; # Increase counter
+        my $idx = first_index { $_ eq $mspc } @dspc;
         print $writefile
-        "\{D$num\.\} $mspc = DUMMY :  DEPOS*\($vd[$idx]\) ;\n" ;
+        "\{D$num\.\} EMISS = $mspc :  $vd[$idx] ;\n" ;
+        print "$mspc:\t$vd[$idx]\n"
 # Otherwise use standard value:
-      } else {
-        $idx = first_index { $_ eq $mspc } @dspc;
-        print $writefile
-        "\{D$num\.\} $mspc = DUMMY :  DEPOS*\($vdstd\) ;\n"
-        if $mspc !~ /EMISS/;
   } } }
 
 # Close all files
@@ -120,6 +106,6 @@ for my $kfu (@fkpp) {
 }
 close($writefile);
 
-print "\n\033[94mOutput written to 'depos.kpp'.\033[0m\n\n"
+print "\n\033[94mOutput written to 'emiss.kpp'.\033[0m\n\n"
 
 #######################################################################
