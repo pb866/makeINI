@@ -28,3 +28,7 @@ INO2      1.00d-5
 DMSO2     5.00d-6
 DMSO      5.00d-6
 MSA       2.00d-6
+O1D       0.00d+0 # no depositon of atoms
+O         0.00d+0
+CL        0.00d+0
+BR        0.00d+0
