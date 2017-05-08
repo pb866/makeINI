@@ -27,7 +27,7 @@ my @fkpp;#     list of file names (and paths) of input KPP files
 #              without file ending '.kpp'
 #              In script argument, put list in quotes
 #              and separate elements by whitespaces
-#  $writefile: output KPP file "depos.kpp"
+my $writefile;#output KPP file "depos.kpp"
 
 ########################################################################
 
@@ -37,7 +37,29 @@ if (exists $ARGV[1]) {
 } else {
   $fdat = '../InitCons/emiss.dat';
 }
-print "\n\033[94mData file:         $fdat\n";
+if (-e "$fdat") {
+  print "\n\033[94mData file:         $fdat\n";
+} elsif ($fdat eq "0" || $fdat eq '-') {
+  print "\033[95m\nWarning! Option '$ARGV[1]':\n",
+        "An empty emissions file has been created!\033[0m\n\n";
+  open($writefile, ">","emiss.kpp")
+  or die "Could not open file emiss.kpp: $!";
+  print $writefile "//Currently no emissions.\n",
+                   "//Template file with sample equation:\n\n",
+                   "//{e2.} EMISS = CH4 : 9.62E+07;\n";
+  close($writefile);
+  exit;
+} else {
+  print "\033[95m\nWarning! File '$fdat' does not exist.\n",
+        "An empty emissions file has been created!\033[0m\n\n";
+  open($writefile, ">","emiss.kpp")
+  or die "Could not open file emiss.kpp: $!";
+  print $writefile "//Currently no emissions.\n",
+                   "//Template file with sample equation:\n\n",
+                   "//{e2.} EMISS = CH4 : 9.62E+07;\n";
+  close($writefile);
+  exit;
+}
 
 # Define input kpp files:
 if (exists $ARGV[0]) {
@@ -78,8 +100,8 @@ print "\033[95mEmissions are only used for species included in the input ",
 ########################################################################
 
 # Open output file and set KPP EQUATIONS variable
-open(my $writefile, ">","emiss.kpp") or die "Could not open file emiss.kpp: $!";
-print $writefile "#DEFFIX\nEMISS=IGNORE;\n#EQUATIONS\n";
+open($writefile, ">","emiss.kpp") or die "Could not open file emiss.kpp: $!";
+print $writefile "#EQUATIONS\n";
 
 # Loop over KPP files
 for my $kfu (@fkpp) {
