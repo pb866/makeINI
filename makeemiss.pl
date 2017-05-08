@@ -32,16 +32,16 @@ my @fkpp;#     list of file names (and paths) of input KPP files
 ########################################################################
 
 # Define input data file:
-if (exists $ARGV[0]) {
-  $fdat = $ARGV[0];
+if (exists $ARGV[1]) {
+  $fdat = $ARGV[1];
 } else {
-  $fdat = 'emiss.dat';
+  $fdat = '../InitCons/emiss.dat';
 }
 print "\n\033[94mData file:         $fdat\n";
 
 # Define input kpp files:
-if (exists $ARGV[1]) {
-  my $targ = $ARGV[1];
+if (exists $ARGV[0]) {
+  my $targ = $ARGV[0];
   $targ =~ s/^\s+//;
   $targ =~ s/\s+$//;
   @fkpp = split(/\s+/, $targ);
@@ -61,7 +61,8 @@ close($dfu);
 # Split array of input lines into array of species names and vd
 # unless it is an empty line or comment line starting with '#'
 foreach (@lines) {
-  if ($_ !~ /^\s*#/ && $_ !~ /^\s*$/) {
+  $_  =~ s/\#.*//;
+  if ($_ !~ /^\s*$/) {
     $_ =~ s/^\s+//;
     my @spl = split(/\s+/, $_);
     push @dspc, $spl[0];
@@ -78,7 +79,7 @@ print "\033[95mEmissions are only used for species included in the input ",
 
 # Open output file and set KPP EQUATIONS variable
 open(my $writefile, ">","emiss.kpp") or die "Could not open file emiss.kpp: $!";
-print $writefile "#DEFFIX\nEMISS=IGNORE;\nEQUATIONS\n";
+print $writefile "#DEFFIX\nEMISS=IGNORE;\n#EQUATIONS\n";
 
 # Loop over KPP files
 for my $kfu (@fkpp) {
