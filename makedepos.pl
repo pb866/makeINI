@@ -42,15 +42,15 @@ if (exists $ARGV[2]) {
 }
 
 # Define input data file:
-if (exists $ARGV[0]) {
-  $fdat = $ARGV[0];
+if (exists $ARGV[1]) {
+  $fdat = $ARGV[1];
 } else {
-  $fdat = 'depos.dat';
+  $fdat = '../InitCons/depos.dat';
 }
 
 # Define input kpp files:
-if (exists $ARGV[1]) {
-  my $targ = $ARGV[1];
+if (exists $ARGV[0]) {
+  my $targ = $ARGV[0];
   $targ =~ s/^\s+//;
   $targ =~ s/\s+$//;
   @fkpp = split(/\s+/, $targ);
@@ -79,7 +79,8 @@ close($dfu);
 # unless it is an empty line or comment line starting with '#'
 print "\nPredefined values\n-----------------\n";
 foreach (@lines) {
-  if ($_ !~ /^\s*#/ && $_ !~ /^\s*$/) {
+  $_  =~ s/\#.*//;
+  if ($_ !~ /^\s*$/) {
     $_ =~ s/^\s+//;
     my @spl = split(/\s+/, $_);
     push @dspc, $spl[0];
@@ -125,14 +126,12 @@ for my $kfu (@fkpp) {
 # Define experimental values:
       if (grep(/^$mspc$/, @dspc)) {
         $num += 1 if $mspc !~ /EMISS/; # Increase counter
-        print "$mspc: $num\n";
         $idx = first_index { $_ eq $mspc } @dspc;
         print $writefile
         "\{D$num\.\} $mspc = DUMMY :  DEPOS*\($vd[$idx]\) ;\n" ;
 # Otherwise use standard value:
       } elsif ($flstd =~ 1) {
         $num += 1 if $mspc !~ /EMISS/; # Increase counter
-        print "$mspc: $num\n";
         $idx = first_index { $_ eq $mspc } @dspc;
         print $writefile
         "\{D$num\.\} $mspc = DUMMY :  DEPOS*\($vdstd\) ;\n"
