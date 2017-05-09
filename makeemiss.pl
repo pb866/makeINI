@@ -37,26 +37,26 @@ if (exists $ARGV[1]) {
 } else {
   $fdat = '../InitCons/emiss.dat';
 }
-if (-e "$fdat") {
+if (-f "$fdat") {
   print "\n\033[94mData file:         $fdat\n";
 } elsif ($fdat eq "0" || $fdat eq '-') {
   print "\033[95m\nWarning! Option '$ARGV[1]':\n",
-        "An empty emissions file has been created!\033[0m\n\n";
+        "An empty KPP emissions file has been created!\033[0m\n\n";
   open($writefile, ">","emiss.kpp")
   or die "Could not open file emiss.kpp: $!";
   print $writefile "//Currently no emissions.\n",
                    "//Template file with sample equation:\n\n",
-                   "//{e2.} EMISS = CH4 : 9.62E+07;\n";
+                   "//{E1.} EMISS = CH4 : 9.62E+07;\n";
   close($writefile);
   exit;
 } else {
   print "\033[95m\nWarning! File '$fdat' does not exist.\n",
-        "An empty emissions file has been created!\033[0m\n\n";
+        "An empty KPP emissions file has been created!\033[0m\n\n";
   open($writefile, ">","emiss.kpp")
   or die "Could not open file emiss.kpp: $!";
   print $writefile "//Currently no emissions.\n",
                    "//Template file with sample equation:\n\n",
-                   "//{e2.} EMISS = CH4 : 9.62E+07;\n";
+                   "//{E1.} EMISS = CH4 : 9.62E+07;\n";
   close($writefile);
   exit;
 }
