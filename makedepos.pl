@@ -32,10 +32,11 @@ my @fkpp;#     list of file names (and paths) of input KPP files
 #              without file ending '.kpp'
 #              In script argument, put list in quotes
 #              and separate elements by whitespaces
-#  $writefile: output KPP file "depos.kpp"
+my $writefile;#output KPP file "depos.kpp"
 
 ########################################################################
 
+### Retrieval of script arguments
 # Define use of standard value:
 if (exists $ARGV[2]) {
   $flstd = $ARGV[2];
@@ -58,8 +59,31 @@ if (exists $ARGV[0]) {
   @fkpp = ('inorganic','organic');
 }
 
-# Screen output
-print "\n\033[94mData file:         $fdat\n";
+### Screen output and checks
+if (-f "$fdat") {
+  print "\n\033[94mData file:         $fdat\n";
+} elsif ($fdat eq "0" || $fdat eq '-') {
+  print "\033[95m\nWarning! Option '$ARGV[1]':\n",
+        "An empty KPP deposition file has been created!\033[0m\n\n";
+  open($writefile, ">","depos.kpp")
+  or die "Could not open file depos.kpp: $!";
+  print $writefile "//Currently no depositions.\n",
+                   "//Template file with sample equation:\n\n",
+                   "//{D1.} O3 = DUMMY :  DEPOS*(4.00d-7) ;\n";
+  close($writefile);
+  exit;
+} else {
+  print "\033[95m\nWarning! File '$fdat' does not exist.\n",
+        "An empty KPP deposition file has been created!\033[0m\n\n";
+  open($writefile, ">","depos.kpp")
+  or die "Could not open file depos.kpp: $!";
+  print $writefile "//Currently no depositions.\n",
+                   "//Template file with sample equation:\n\n",
+                   "//{D1.} O3 = DUMMY :  DEPOS*(4.00d-7) ;\n";
+  close($writefile);
+  exit;
+}
+
 print "KPP input file(s): ", join(", ", @fkpp), "\n";
 if ($flstd =~ 0) {
   print "Only deposition data from $fdat used.\033[0m\n"
