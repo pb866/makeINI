@@ -41,6 +41,7 @@ if (-f "$fdat") {
 } elsif ($fdat eq "0" || $fdat eq '-') {
   print "\033[95m\nWarning! Option '$ARGV[1]':\n",
         "An empty KPP emissions file has been created!\033[0m\n\n";
+  print "\n\033[94mOutput written to 'emiss.kpp'.\033[0m\n\n";
   open($writefile, ">","emiss.kpp")
   or die "Could not open file emiss.kpp: $!";
   print $writefile "//Currently no emissions.\n",
@@ -51,6 +52,7 @@ if (-f "$fdat") {
 } else {
   print "\033[95m\nWarning! File '$fdat' does not exist.\n",
         "An empty KPP emissions file has been created!\033[0m\n\n";
+  print "\n\033[94mOutput written to 'emiss.kpp'.\033[0m\n\n";
   open($writefile, ">","emiss.kpp")
   or die "Could not open file emiss.kpp: $!";
   print $writefile "//Currently no emissions.\n",
@@ -119,7 +121,7 @@ for my $kfu (@fkpp) {
         my @idx = grep { $dspc[$_] eq $mspc } 0 .. $#dspc; # find index in array
         print $writefile
         "\{D$num\.\} EMISS = $mspc :  $vd[$idx[-1]] ;\n" ;
-        print "$mspc:\t$vd[$idx[-1]]\n"
+        print "$mspc:\t$vd[$idx[-1]]\n";
 # Otherwise use standard value:
   } } }
 
@@ -128,6 +130,18 @@ for my $kfu (@fkpp) {
 }
 close($writefile);
 
-print "\n\033[94mOutput written to 'emiss.kpp'.\033[0m\n\n"
+if ($num ==0) {
+  open($writefile, ">","emiss.kpp")
+  or die "Could not open file emiss.kpp: $!";
+  print $writefile "//Currently no emissions.\n",
+             "//Template file with sample equation:\n\n",
+             "//{E1.} EMISS = CH4 : 9.62E+07;\n";
+  close($writefile);
+  print "\n\033[95mWarning! No species in the data file\n",
+        "matched the species in the current mechanism.\n",
+        "An empty sample KPP emissions file has been created.\033[0m\n";
+}
+
+print "\n\033[94mOutput written to 'emiss.kpp'.\033[0m\n\n";
 
 #######################################################################
