@@ -1,7 +1,6 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
-use List::MoreUtils qw(first_index); # to find first index of an entry in a list
 
 ### Variable declarations
 ## Data arrays and variables
@@ -15,7 +14,7 @@ my $num= 0 ;  # counter for reaction labels in output file
 ## Temporary auxiliary arrays/variables
 #  @lines:  lines read in from input file
 #  @spl:    array with separated species and vd from input line
-#  $idx:    index of current species in species/vd array
+#  @idx:    index of current species in species/vd array
 
 ## file handling
 #  $dfu:       file unit for data file "depos.dat"
@@ -117,10 +116,10 @@ for my $kfu (@fkpp) {
 # Define experimental values:
       if (grep(/^$mspc$/, @dspc)) {
         $num += 1 ; # Increase counter
-        my $idx = first_index { $_ eq $mspc } @dspc;
+        my @idx = grep { $dspc[$_] eq $mspc } 0 .. $#dspc; # find index in array
         print $writefile
-        "\{D$num\.\} EMISS = $mspc :  $vd[$idx] ;\n" ;
-        print "$mspc:\t$vd[$idx]\n"
+        "\{D$num\.\} EMISS = $mspc :  $vd[$idx[-1]] ;\n" ;
+        print "$mspc:\t$vd[$idx[-1]]\n"
 # Otherwise use standard value:
   } } }
 

@@ -1,7 +1,6 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
-use List::MoreUtils qw(first_index); # to find first index of an entry in a list
 
 ### Variable declarations
 ## Data arrays and variables
@@ -15,7 +14,7 @@ my $num= 0;   # counter for reaction labels in output file
 ## Temporary auxiliary arrays/variables
 #  @lines:  lines read in from input file
 #  @spl:    array with separated species and vd from input line
-#  $idx:    index of current species in species/vd array
+#  @idx:    index of current species in species/vd array
 
 ## Switch to extend standard value to all species in mechanism
 #  (retrieved from 3rd script argument)
@@ -114,9 +113,9 @@ foreach (@lines) {
 
 # Find standard value and save to vdstd.
 # If no standard value is defined in input file, use 5.00d-6.
-my $idx = first_index { $_ eq "DEPOS" } @dspc;
-if ($idx > 0) {
-  $vdstd = $vd[$idx];
+my @idx = grep { $dspc[$_] eq "DEPOS" } 0 .. $#dspc;
+if ($idx[-1] > 0) {
+  $vdstd = $vd[$idx[-1]];
 } else {
   $vdstd = "5.00d-6"
 }
@@ -150,13 +149,13 @@ for my $kfu (@fkpp) {
 # Define experimental values:
       if (grep(/^$mspc$/, @dspc)) {
         $num += 1 if $mspc !~ /EMISS/; # Increase counter
-        $idx = first_index { $_ eq $mspc } @dspc;
+        @idx = grep { $dspc[$_] eq $mspc } 0 .. $#dspc;
         print $writefile
-        "\{D$num\.\} $mspc = DUMMY :  DEPOS*\($vd[$idx]\) ;\n" ;
+        "\{D$num\.\} $mspc = DUMMY :  DEPOS*\($vd[$idx[-1]]\) ;\n" ;
 # Otherwise use standard value:
       } elsif ($flstd =~ 1) {
         $num += 1 if $mspc !~ /EMISS/; # Increase counter
-        $idx = first_index { $_ eq $mspc } @dspc;
+        @idx = grep { $dspc[$_] eq $mspc } 0 .. $#dspc;
         print $writefile
         "\{D$num\.\} $mspc = DUMMY :  DEPOS*\($vdstd\) ;\n"
         if $mspc !~ /EMISS/;
