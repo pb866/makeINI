@@ -8,9 +8,9 @@ Auxiliary scripts for the box model _DSMACC_
 (https://github.com/pb866/DSMACC-testing.git) to generate _KPP_ files
 with emission and deposition rates from data files. The scripts translate
 emission and deposition data that is arranged in columns with species
-names and rate date separated by whitespaces to _KPP_ language that can be
+names and rate data separated by whitespaces to _KPP_ language that can be
 interpreted by the box model _DSMACC_. Only the data are treated for
-species that are part of the current mechanism. For deposition velocities
+species that are part of the current mechanism. For deposition velocities,
 you can specify to apply a standard deposition rate to all species for
 which no predefined values exist.
 
@@ -18,13 +18,13 @@ which no predefined values exist.
 Running the script
 ------------------
 
-### Shell running commands
+### Shell commands
 
 The scripts can be run by themselves or with make within the model _DSMACC_
 (https://github.com/pb866/DSMACC-testing.git). To run by themselves use:
 
 ```
-perl makeemiss.pl [<list of kpp input files.>]]
+perl makeemiss.pl [<list of kpp input files.> [<data file>]]
 perl makedepos.pl [<list of kpp input files.> [<data file> [<flag for standard>]]]
 ```
 
@@ -38,8 +38,7 @@ are obsolete, standard values will be assigned.
 #### KPP input files
 
 The scripts check for emission and deposition data, whether the species
-is actually part of the current mechanism (as otherwise _KPP_ will fall
-over). Therefore, all _KPP_ files (and relative or absolute folder paths)
+are actually part of the current mechanism (as otherwise _KPP_ will crash). Therefore, all _KPP_ files (and relative or absolute folder paths)
 of the current mechanism need to be specified in the first script argument.
 Files need to specified with the names of the _KPP_ files without the file
 endings '.kpp' as a list separated by whitespaces wrapped in quotes. The
@@ -53,7 +52,7 @@ standard names in both files are defined as:
 #### Data file
 
 The actual emission and deposition data to be included in the scenario
-are saved in text files. Standard pahts/names are `../InitCons/emiss.dat`
+are saved in text files. Standard paths/names are `../InitCons/emiss.dat`
 and `../InitCons/depos.dat`.
 Any other name can be specified in the 2nd script argument.  
 The format is:
@@ -65,18 +64,25 @@ species names   emission/deposition rate # inline comment
 DEPOS           <standard vd>
 ```
 
-The file consists of 2 columns, separated by whitespace. The first column
+Data files consists of 2 columns separated by whitespace. The first column
 holds the _MCM_ species names, the second column the emission or deposition
 rate in s<sup>-1</sup> in _FORTRAN_ format, i.e. `X.XXD±XX`. Comments can
-be added as line comments or at the end of the data indicated by `#` at the beginning.
+be added as line comments or at the end of the data with an initial `#`.
 
 In the deposition data a standard value can be defined, which is then
 extended to all species in the mechanism except for those with definitions
 already in the data file. The key word for the standard value is `DEPOS`
-as species named followed by the value of the standard _v<sub>d</sub>_
+as species name followed by the value of the standard _v<sub>d</sub>_
 in the second column. If no value is assigned, but the option to extend
 a standard value to all species is used (see next section), the script
 assigns a _standard v<sub>d</sub>_ of `5.00d-6`.
+
+If no emission or deposition data is desired, you can set the second
+script argument to `0` or `-`. Alternatively, you can delete the data
+files. If a data file is not found or the 2nd argument is set to `0`
+or `-`, an empty KPP file with a few sample comments is generated, which
+is needed for a proper compilation of the _DSMACC_ box model.
+
 
 
 #### Standard depositon rate
@@ -130,9 +136,3 @@ FKPP ?= 'inorganic organic' # kpp input file variable for makedepos scrpit
 FSTD  ?= 1                  # option to extend standard vd to all species
 export FDEP, FEMI, FKPP, FSTD
 ```
-
-
-To Do
------
-
-* Change folder paths of data files to `../InitCons/`
