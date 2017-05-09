@@ -1,7 +1,6 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
-use List::MoreUtils qw(first_index); # to find first index of an entry in a list
 
 ### Variable declarations
 ## Data arrays and variables
@@ -15,7 +14,7 @@ my $num= 0;   # counter for reaction labels in output file
 ## Temporary auxiliary arrays/variables
 #  @lines:  lines read in from input file
 #  @spl:    array with separated species and vd from input line
-#  $idx:    index of current species in species/vd array
+#  @idx:    index of current species in species/vd array
 
 ## Switch to extend standard value to all species in mechanism
 #  (retrieved from 3rd script argument)
@@ -65,6 +64,7 @@ if (-f "$fdat") {
 } elsif ($fdat eq "0" || $fdat eq '-') {
   print "\033[95m\nWarning! Option '$ARGV[1]':\n",
         "An empty KPP deposition file has been created!\033[0m\n\n";
+  print "\n\033[94mOutput written to 'depos.kpp'.\033[0m\n\n";
   open($writefile, ">","depos.kpp")
   or die "Could not open file depos.kpp: $!";
   print $writefile "//Currently no depositions.\n",
@@ -75,6 +75,7 @@ if (-f "$fdat") {
 } else {
   print "\033[95m\nWarning! File '$fdat' does not exist.\n",
         "An empty KPP deposition file has been created!\033[0m\n\n";
+  print "\n\033[94mOutput written to 'depos.kpp'.\033[0m\n\n";
   open($writefile, ">","depos.kpp")
   or die "Could not open file depos.kpp: $!";
   print $writefile "//Currently no depositions.\n",
@@ -86,9 +87,9 @@ if (-f "$fdat") {
 
 print "KPP input file(s): ", join(", ", @fkpp), "\n";
 if ($flstd =~ 0) {
-  print "Only deposition data from $fdat used.\033[0m\n"
+  print "Only deposition data from $fdat used.\033[0m\n";
 } elsif ($flstd =~ 1) {
-  print "Standard vd extended to all species in mechanism.\033[0m\n"
+  print "Standard vd extended to all species in mechanism.\033[0m\n";
 }
 
 ########################################################################
@@ -114,9 +115,9 @@ foreach (@lines) {
 
 # Find standard value and save to vdstd.
 # If no standard value is defined in input file, use 5.00d-6.
-my $idx = first_index { $_ eq "DEPOS" } @dspc;
-if ($idx > 0) {
-  $vdstd = $vd[$idx];
+my @idx = grep { $dspc[$_] eq "DEPOS" } 0 .. $#dspc; # find index in array
+if ($idx[-1] > 0) { # for double entries, always the last entry is used
+  $vdstd = $vd[$idx[-1]];
 } else {
   $vdstd = "5.00d-6"
 }
@@ -150,13 +151,13 @@ for my $kfu (@fkpp) {
 # Define experimental values:
       if (grep(/^$mspc$/, @dspc)) {
         $num += 1 if $mspc !~ /EMISS/; # Increase counter
-        $idx = first_index { $_ eq $mspc } @dspc;
+        @idx = grep { $dspc[$_] eq $mspc } 0 .. $#dspc;
         print $writefile
-        "\{D$num\.\} $mspc = DUMMY :  DEPOS*\($vd[$idx]\) ;\n" ;
+        "\{D$num\.\} $mspc = DUMMY :  DEPOS*\($vd[$idx[-1]]\) ;\n" ;
 # Otherwise use standard value:
       } elsif ($flstd =~ 1) {
         $num += 1 if $mspc !~ /EMISS/; # Increase counter
-        $idx = first_index { $_ eq $mspc } @dspc;
+        @idx = grep { $dspc[$_] eq $mspc } 0 .. $#dspc;
         print $writefile
         "\{D$num\.\} $mspc = DUMMY :  DEPOS*\($vdstd\) ;\n"
         if $mspc !~ /EMISS/;
@@ -167,6 +168,18 @@ for my $kfu (@fkpp) {
 }
 close($writefile);
 
-print "\n\033[94mOutput written to 'depos.kpp'.\033[0m\n\n"
+if ($num ==0) {
+  open($writefile, ">","depos.kpp")
+  or die "Could not open file depos.kpp: $!";
+  print $writefile "//Currently no depositions.\n",
+                   "//Template file with sample equation:\n\n",
+                   "//{D1.} O3 = DUMMY :  DEPOS*(4.00d-7) ;\n";
+  close($writefile);
+  print "\n\033[95mWarning! No species in the data file\n",
+        "matched the species in the current mechanism.\n",
+        "An empty sample KPP depositions file has been created.\033[0m\n"
+}
+
+print "\n\033[94mOutput written to 'depos.kpp'.\033[0m\n\n";
 
 #######################################################################
