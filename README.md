@@ -130,9 +130,13 @@ you can define new standard values in the Makefile (see commented section
 at the top):
 
 ```
-FDEP ?= 'depos.dat'         # data file variable for makedepos script
-FEMI ?= 'emiss.dat'         # data file variable for makedepos script
-FKPP ?= 'inorganic organic' # kpp input file variable for makedepos scrpit
-FSTD  ?= 1                  # option to extend standard vd to all species
+FDEP ?= 'depos.dat'           # data file variable for makedepos script
+FEMI ?= 'emiss.dat'           # data file variable for makedepos script
+FKPP ?= '"inorganic organic"' # kpp input file variable for makedepos scrpit
+FSTD  ?= 1                    # option to extend standard vd to all species
 export FDEP, FEMI, FKPP, FSTD
 ```
+
+__The KPP file list needs to be wrapped in single _AND_ double quote to
+hand over a pair of quotes as argument to the script! The outer quotes
+will be omitted as they are part of the Makefile argument.__
