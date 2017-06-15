@@ -116,7 +116,7 @@ foreach (@lines) {
 # Find standard value and save to vdstd.
 # If no standard value is defined in input file, use 5.00d-6.
 my @idx = grep { $dspc[$_] eq "DEPOS" } 0 .. $#dspc; # find index in array
-if ($idx[-1] > 0) { # for double entries, always the last entry is used
+if ($idx[-1] >= 0) { # for double entries, always the last entry is used
   $vdstd = $vd[$idx[-1]];
 } else {
   $vdstd = "5.00d-6"
