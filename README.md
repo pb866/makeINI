@@ -4,16 +4,14 @@ Perl scripts makedepos.pl and makeemiss.pl
 Purpose
 -------
 
-Auxiliary scripts for the box model _DSMACC_
-(https://github.com/pb866/DSMACC-testing.git) to generate _KPP_ files
+Auxiliary scripts for the box model
+[_DSMACC_](https://github.com/pb866/DSMACC-testing.git) to generate _KPP_ files
 with emission and deposition rates from data files. The scripts translate
-emission and deposition data that is arranged in columns with species
-names and rate data separated by whitespaces to _KPP_ language that can be
-interpreted by the box model _DSMACC_. Only the data are treated for
-species that are part of the current mechanism. For deposition velocities,
-you can specify to apply a standard deposition rate to all species for
-which no predefined values exist.
-
+emission and deposition data that is arranged in columns with species names and
+rate data separated by whitespaces to _KPP_ language that can be interpreted by
+the box model _DSMACC_. Only the data are treated for species that are part of
+the current mechanism. For deposition rates, you can specify to apply a
+standard deposition rate to all species for which no predefined values exist.
 
 Running the script
 ------------------
@@ -24,8 +22,8 @@ The scripts can be run by themselves or with make within the model _DSMACC_
 (https://github.com/pb866/DSMACC-testing.git). To run by themselves use:
 
 ```
-perl makeemiss.pl [<list of kpp input files.> [<data file>]]
-perl makedepos.pl [<list of kpp input files.> [<data file> [<flag for standard>]]]
+perl makeemiss.pl [<list of kpp input files.> [<data file> [<kpp output file>]]]
+perl makedepos.pl [<list of kpp input files.> [<data file> [<kpp output file> [<flag for standard>]]]]
 ```
 
 All parameter are optional, if you want to assign the second or third
@@ -38,27 +36,26 @@ are obsolete, standard values will be assigned.
 #### KPP input files
 
 The scripts check for emission and deposition data, whether the species
-are actually part of the current mechanism (as otherwise _KPP_ will crash). Therefore, all _KPP_ files (and relative or absolute folder paths)
-of the current mechanism need to be specified in the first script argument.
-Files need to specified with the names of the _KPP_ files without the file
-endings '.kpp' as a list separated by whitespaces wrapped in quotes. The
-standard names in both files are defined as:
+are actually part of the current mechanism (as otherwise _KPP_ will crash).
+Therefore, all _KPP_ files of the current mechanism need to be specified in the
+first script argument. Files need to specified with the names of the _KPP_
+files without the file endings '.kpp' and the folder paths `./mechanisms/` as a
+list separated by whitespaces wrapped in quotes. The standard names in both
+files are defined as:
 
-```
+ ```
 "inorganic organic"
 ```
 
 
-#### Data file
+#### Data files
 
 The actual emission and deposition data to be included in the scenario
-are saved in text files. Standard paths/names are `../InitCons/emiss.dat`
-and `../InitCons/depos.dat`.
-Any other name can be specified in the 2nd script argument.  
-The format is:
+are saved in text files. The script will stop, if this parameter is empty.
+The format of the data files is:
 
-```
-# Line comments started by '#'
+```shell
+# Comments started by '#'
 <column 1> <whitespace separator(s)> <column 1>
 species names   emission/deposition rate # inline comment
 DEPOS           <standard vd>
@@ -77,12 +74,18 @@ in the second column. If no value is assigned, but the option to extend
 a standard value to all species is used (see next section), the script
 assigns a _standard v<sub>d</sub>_ of `5.00d-6`.
 
-If no emission or deposition data is desired, you can set the second
-script argument to `0` or `-`. Alternatively, you can delete the data
-files. If a data file is not found or the 2nd argument is set to `0`
-or `-`, an empty KPP file with a few sample comments is generated, which
-is needed for a proper compilation of the _DSMACC_ box model.
 
+#### KPP output files
+
+The third programme argument defines the folder paths and name of the output kpp
+file. A default file will be generated in the mechanisms folder, if the argument
+is empty with the name of the data file preceeded by `emiss_` or `depos` and the
+file ending `kpp`.
+
+Default name:
+```
+./mechanisms/[emiss/depos]_<data file name>.kpp
+```
 
 
 #### Standard depositon rate
@@ -97,46 +100,59 @@ If you only want to use the measured emission values in your data file,
 assign a `0` to the 3rd script argument. The standard value is `1`, which
 means the assignment of the standard deposition velocity.
 
+
 Script output
 -------------
 
-The scipts produce _KPP_ files with the standard names `depos.kpp` and
-`emiss.kpp`. File names are hard coded and need to be changed in the
-script. Include the _KPP_ code in your master _KPP_ file and run _KPP_
-to use the emission and deposition rates in your model runs.
+The scipts produce _KPP_ files with the [above](#kpp-output-files) default names.
+Include the _KPP_ code in your master _KPP_ file or during `make kpp` and run
+_KPP_ to use the emission and deposition rates in your model runs.
 
 
 Links to _DSMACC_
 -----------------
 
-The script is designed for the _DSMACC_ version available on [github](https://github.com/pb866/DSMACC-testing.git). Place the scripts
-`makeemiss.pl` and `makedepos.pl` in your mechanisms folder together with
-your _KPP_ mechanism files. Place the data files in your _InitCons_ folder.
-Add or change the include commands in `src/model.kpp` to include the
-generated kpp files in your mechanism and generate the mechanism with
-`make kpp.`
+The script is designed for the _DSMACC_ version available on
+[github](https://github.com/pb866/DSMACC-testing.git). Place the scripts
+`makeemiss.pl` and `makedepos.pl` in `./src/background/` together with
+your _KPP_ mechanism files in `./mechanisms/`. Place the data files in your
+`InitCons` folder. Run `make kpp` and follow the on-screen instructions.
 
-Alternatively, to running each script with perl individallyfor emissions
-and depositions, you can create both scripts in one go by running
-`make ini` in your main folder. If you want to pass over arguments to the
-script, use the respective make variables `FKPP, FDEP, FEMI, and FSTD`:
 
-```
-make ini FDEP=<deposition data file> FEMI=<emission data file> FKPP=<"list of KPP input files"> FSTD=<switch for standard vd>
-```
 
-Alternatively, to changing standard values of the script in the source code,
-you can define new standard values in the Makefile (see commented section
-at the top):
+Version history
+===============
 
-```
-FDEP ?= 'depos.dat'           # data file variable for makedepos script
-FEMI ?= 'emiss.dat'           # data file variable for makedepos script
-FKPP ?= '"inorganic organic"' # kpp input file variable for makedepos scrpit
-FSTD  ?= 1                    # option to extend standard vd to all species
-export FDEP, FEMI, FKPP, FSTD
-```
+v1.3
+----
+- Revised folder paths, so script is called from _DSMACC_ main folder
+- New script argument for KPP output file name
+- Default KPP output file: `./mechanisms/[emiss/depos]\_<data file name>.kpp`
+- No default data file name, script stops, if argument is empty of file doesn't exist
 
-__The KPP file list needs to be wrapped in single _AND_ double quote to
-hand over a pair of quotes as argument to the script! The outer quotes
-will be omitted as they are part of the Makefile argument.__
+v1.2.2
+------
+- Updated README
+
+v1.2.1
+------
+- Fix in assignment of _v<sub>d</sub>_ that allows only the assignment of
+  _v<sub>d</sub>_ without any further definitions
+
+v1.2
+----
+- Omission of perl modules
+- Additional warnings for empty output files
+
+v1.1
+----
+- Generation of empty kpp output files, if second argument is `0` or `-`
+  or data file doesn't exist
+- On-screen warnings
+
+v1.0
+----
+- First working version
+- Predefined _v<sub>d</sub>_
+- Script arguments for KPP files and data file
+- Switch to extend standard _v<sub>d</sub>_ or use predefined values only
