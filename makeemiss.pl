@@ -5,16 +5,14 @@ use warnings;
 ### Variable declarations
 ## Data arrays and variables
 my @dspc;     # species with predefined deposition velocities
-my @vd;       # deposition velocities
+my @edat;     # emission data
 my $mspc;     # species used in current mechanism
-my $vdstd;    # standard deposition velocitiy
-              # (defined with key word "DEPOS" in depos.dat)
 my $num= 0 ;  # counter for reaction labels in output file
 
 ## Temporary auxiliary arrays/variables
 #  @lines:  lines read in from input file
-#  @spl:    array with separated species and vd from input line
-#  @idx:    index of current species in species/vd array
+#  @spl:    array with separated species and emission data from input line
+#  @idx:    index of current species in species/edat array
 
 ## file handling
 #  $dfu:       file unit for data file "depos.dat"
@@ -75,13 +73,13 @@ print "KPP input file(s): ", join(", ", @fkpp), "\033[0m\n\n";
 
 ########################################################################
 
-# Read in species and definitions of deposition velocities (vd)
+# Read in species and definitions of emission data (edat)
 # from data file "depos.dat"
 open (my $dfu, '<', $fdat) or die "Could not open file $fdat: $!";
 chomp(my @lines = <$dfu>);
 close($dfu);
 
-# Split array of input lines into array of species names and vd
+# Split array of input lines into array of species names and emission data
 # unless it is an empty line or comment line starting with '#'
 foreach (@lines) {
   $_  =~ s/\#.*//;
@@ -89,7 +87,7 @@ foreach (@lines) {
     $_ =~ s/^\s+//;
     my @spl = split(/\s+/, $_);
     push @dspc, $spl[0];
-    push @vd, $spl[1];
+    push @edat, $spl[1];
 } }
 print "\033[95mEmissions are only used for species included in the input ",
       "mechanisms.\nIF species are not listed here, but in $fdat, check for ",
@@ -120,8 +118,8 @@ for my $kfu (@fkpp) {
         $num += 1 ; # Increase counter
         my @idx = grep { $dspc[$_] eq $mspc } 0 .. $#dspc; # find index in array
         print $writefile
-        "\{D$num\.\} EMISS = $mspc :  $vd[$idx[-1]] ;\n" ;
-        print "$mspc:\t$vd[$idx[-1]]\n";
+        "\{E$num\.\} EMISS = $mspc :  $edat[$idx[-1]] ;\n" ;
+        print "$mspc:\t$edat[$idx[-1]]\n";
 # Otherwise use standard value:
   } } }
 
