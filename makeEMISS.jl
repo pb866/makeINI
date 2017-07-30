@@ -1,14 +1,16 @@
 #!/usr/local/bin/julia
 
-# ARGS = ["inorganic organic","../InitCons/Edw14.emi"]
-
-# Set standard values for missing file names from programme arguments
-push!(LOAD_PATH,"$(pwd())/jl.mod")
+# Define path to add julia modules
+# Save main script in /src/background and modules in /src/background/jl.mod
+push!(LOAD_PATH,"$(pwd())/src/background/jl.mod")
 using DataFrames
-using readfiles, rddat
-# using test
-#
-# pstr(2.e-13,1.0)
-# println(fkpp,fdat,fout)
-emiss = rdini(fdat)
-println("\n\n$emiss")
+using readfiles, rddat, wrtkpp
+
+# Read in emission data from input files defined in second script argument
+emiss = rddat.rdini(fdat)
+# Retrieve all species (KPP names) from current mechanisms defined in first script argument
+kppspc = rdspc(fkpp)
+# Write emission scheme to output file
+# (defined in 3rd argument, default: ./mechanisms/emiss_<data file name>.kpp)
+# and print information to screen
+emikpp(fout,emiss,kppspc)
