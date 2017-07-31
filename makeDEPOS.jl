@@ -7,17 +7,18 @@ push!(LOAD_PATH,"$(pwd())/makeINI/jl.mod")
 using DataFrames
 using readfiles, rddata, wrtkpp
 
-# prevent error messages from empty array by assuring at least 3 elements with empty strings
-for i in range(1,3) push!(ARGS,"") end
+# prevent error messages from empty array by assuring at least 4 elements with empty strings
+for i in range(1,4) push!(ARGS,"") end
 # Retrieve folder paths and file names from script arguments
-fkpp = rdkpp(ARGS[1],"emission")
-fdat = rddat(ARGS[2],"emission")
-fout = rdout(ARGS[3],ARGS[2],"emiss")
+fkpp  = rdkpp(ARGS[1],"deposition")
+fdat  = rddat(ARGS[2],"deposition")
+fout  = rdout(ARGS[3],ARGS[2],"depos")
+flstd = rdstd(ARGS[4])
 # Read in emission data from input files defined in second script argument
-emiss = rdini(fdat)
+depos = rdini(fdat)
 # Retrieve all species (KPP names) from current mechanisms defined in first script argument
 kppspc = rdspc(fkpp)
 # Write emission scheme to output file
 # (defined in 3rd argument, default: ./mechanisms/emiss_<data file name>.kpp)
 # and print information to screen
-emikpp(fout,emiss,kppspc)
+depkpp(fout,fdat,depos,kppspc,flstd)
