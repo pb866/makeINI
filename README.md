@@ -119,9 +119,32 @@ your _KPP_ mechanism files in `./mechanisms/`. Place the data files in your
 `InitCons` folder. Run `make kpp` and follow the on-screen instructions.
 
 
+Julia scripts makeEMISS.jl / makeDEPOS.jl
+=========================================
+
+The perl scripts have been re-written in julialang. The functionalities stay the
+same as for the perl script with refined on-screen warning messages and additional
+information about the scripts used and the date/time generated in the output file.
+
+Call files using the same arguments/rules as defined [above](#shell commands):
+
+```shell
+julia makeEMISS.jl [ARGS]
+julia makeDEPOS.jl [ARGS]
+```
+
+
 
 Version history
 ===============
+
+v2.0
+----
+- Scripts re-written in julialang (julia 0.6.0)
+- Refined on-screen warnings about missing files and missing species in the
+  mechanism
+- Additional information about script version and date/time generated in the
+  output kpp files
 
 v1.3
 ----
