@@ -1,6 +1,6 @@
 __precompile__()
 """
-# Module *rddat*
+# Module *rddata*
 
 Holds functions for reading the data from all input files.
 
@@ -22,7 +22,7 @@ CH3OH     1.00d-5
 - rdini
 - rdspc
 """
-module rddat
+module rddata
 using DataFrames
 export rdini, rdspc
 
@@ -30,13 +30,13 @@ export rdini, rdspc
 """
     rdini(fdat)
 
-Read emission data from input data file (fdat defined as String) and
-return dataframe holding species names (`:spc`) and emission rates (`:emi`)
+Read emission/deposition data from input data file (`fdat` defined as String) and
+return dataframe holding species names (`:spc`) and rates (`:rate`)
 """
 function rdini(fdat::String)
 
   #Initialise dataframe
-  inidat = DataFrame(spc = String[], emi = String[])
+  inidat = DataFrame(spc = String[], rate = String[])
   open(fdat,"r") do f
     # Read input data file
     flines = readlines(f)
@@ -50,7 +50,7 @@ function rdini(fdat::String)
       end
     end
   end
-  # return emission data
+  # return emission/deposition data
   return inidat
 end #function inidat
 
@@ -58,11 +58,10 @@ end #function inidat
 """
     rdspc(fkpp)
 
-Read emission data from all input kpp file(fkpp)
-and return list with species names of current mechanism.
+Find all species in current mechanism from all input kpp files (`fkpp`)
+and return list with species names (`kppspc`).
 """
-function rdspc(fkpp::String)
-
+function rdspc(fkpp)
   # Initialise list of kpp species
   kppspc = []
   # Loop over kpp files
@@ -76,7 +75,7 @@ function rdspc(fkpp::String)
           # Set flag for species definitions to true upon keyword '#DEFVAR'
           spcdef = true
         elseif contains(uppercase(line),"IGNORE") == false && spcdef == true
-          # Set flag for species definitions to false after last species definition
+          # After last species definition, exit current kpp file
           break
         elseif line[1:2] == "//"
           # Ignore kpp comment lines
