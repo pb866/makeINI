@@ -30,8 +30,8 @@ export rdini, rdspc
 """
     rdini(fdat)
 
-Read emission/deposition data from input data file (fdat defined as String) and
-return dataframe holding species names (`:spc`) and rates (`:ini`)
+Read emission/deposition data from input data file (`fdat` defined as String) and
+return dataframe holding species names (`:spc`) and rates (`:rate`)
 """
 function rdini(fdat::String)
 
@@ -58,8 +58,8 @@ end #function inidat
 """
     rdspc(fkpp)
 
-Find all species in current mechanism from all input kpp file(fkpp)
-and return list with species names.
+Find all species in current mechanism from all input kpp files (`fkpp`)
+and return list with species names (`kppspc`).
 """
 function rdspc(fkpp)
   # Initialise list of kpp species
@@ -75,7 +75,7 @@ function rdspc(fkpp)
           # Set flag for species definitions to true upon keyword '#DEFVAR'
           spcdef = true
         elseif contains(uppercase(line),"IGNORE") == false && spcdef == true
-          # Set flag for species definitions to false after last species definition
+          # After last species definition, exit current kpp file
           break
         elseif line[1:2] == "//"
           # Ignore kpp comment lines
