@@ -138,6 +138,14 @@ julia makeDEPOS.jl [ARGS]
 Version history
 ===============
 
+v2.1
+----
+- Performance improvements in julia scripts: scripts are now callable from every
+  directory without giving errors that the self-made modules are not found in the
+  current path
+- bug fix in perl script makedepos.pl, which would not assign a standard deposition
+  rate, if DEPOS was the only definition in the dep file
+
 v2.0
 ----
 - Scripts re-written in julialang (julia 0.6.0)
@@ -145,6 +153,7 @@ v2.0
   mechanism
 - Additional information about script version and date/time generated in the
   output kpp files
+- Minor fixes in perl scripts
 
 v1.3
 ----

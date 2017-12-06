@@ -2,8 +2,7 @@
 
 # Define path to add julia modules
 # Save main script in /src/background and modules in /src/background/jl.mod
-push!(LOAD_PATH,"$(pwd())/src/background/jl.mod")
-# push!(LOAD_PATH,"$(pwd())/makeINI/jl.mod") # debug version
+push!(LOAD_PATH,"$(dirname(Base.source_path()))/jl.mod")
 
 # Load modules
 using DataFrames
@@ -13,7 +12,7 @@ using readfiles, rddata, wrtkpp
 ini = "deposition"
 
 # prevent error messages from empty array by assuring at least 4 elements with empty strings
-for i in range(1,4) push!(ARGS,"") end
+for i in range(1,4-length(ARGS)) push!(ARGS,"") end
 # Retrieve folder paths and file names from script arguments
 fkpp  = rdkpp(ARGS[1],ini)
 fdat  = rddat(ARGS[2],ini)
